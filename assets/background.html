@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+body{margin:0}
+canvas{display:block}
+</style>
+</head>
+
+<body>
+
+<script>
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+
+const renderer = new THREE.WebGLRenderer({alpha:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+
+document.body.appendChild(renderer.domElement);
+
+const geometry = new THREE.SphereGeometry(0.05,16,16);
+const material = new THREE.MeshBasicMaterial({color:0x00ffff});
+
+const nodes = [];
+
+for(let i=0;i<200;i++){
+
+const node = new THREE.Mesh(geometry,material);
+
+node.position.x=(Math.random()-0.5)*20
+node.position.y=(Math.random()-0.5)*20
+node.position.z=(Math.random()-0.5)*20
+
+scene.add(node)
+nodes.push(node)
+
+}
+
+camera.position.z=5
+
+function animate(){
+
+requestAnimationFrame(animate)
+
+nodes.forEach(n=>{
+n.rotation.x+=0.002
+n.rotation.y+=0.002
+})
+
+renderer.render(scene,camera)
+
+}
+
+animate()
+
+</script>
+
+</body>
+</html>
