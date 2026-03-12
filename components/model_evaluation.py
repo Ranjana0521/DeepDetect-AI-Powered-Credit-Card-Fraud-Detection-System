@@ -5,9 +5,6 @@ import seaborn as sns
 import os
 
 
-# -------------------------------------------------------
-# LOAD DATASET (WORKS LOCALLY + STREAMLIT CLOUD)
-
 @st.cache_data
 def load_data():
 
@@ -19,9 +16,6 @@ def load_data():
     return pd.read_csv(url)
 
 
-# -------------------------------------------------------
-# ANALYTICS DASHBOARD
-
 def show_dashboard():
 
     st.subheader("📊 Transaction Analytics Dashboard")
@@ -30,7 +24,7 @@ def show_dashboard():
 
     col1, col2 = st.columns(2)
 
-    # Fraud vs Legitimate transactions
+    # Fraud vs Legit Transactions
     with col1:
 
         st.markdown("### Fraud vs Legit Transactions")
@@ -40,23 +34,20 @@ def show_dashboard():
         fig, ax = plt.subplots()
 
         sns.barplot(
-            x=fraud_counts.index,
+            x=["Legit", "Fraud"],
             y=fraud_counts.values,
-            palette="viridis",
-            ax=ax
+            palette="viridis"
         )
-
-        ax.set_xticklabels(["Legit", "Fraud"])
 
         st.pyplot(fig)
 
-    # Transaction amount distribution
+    # Amount Distribution
     with col2:
 
         st.markdown("### Transaction Amount Distribution")
 
         fig, ax = plt.subplots()
 
-        sns.histplot(df["Amount"], bins=50, kde=True, ax=ax)
+        sns.histplot(df["Amount"], bins=50, kde=True)
 
         st.pyplot(fig)
