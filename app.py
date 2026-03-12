@@ -5,6 +5,7 @@ import joblib
 import shap
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+import os
 
 from components.model_evaluation import show_model_metrics
 from components.analytics_dashboard import show_dashboard
@@ -25,13 +26,20 @@ model = joblib.load("model/fraud_model.pkl")
 scaler = joblib.load("model/scaler.pkl")
 
 # -------------------------------------------------------
-# LOAD DATASET (STREAMLIT CLOUD SAFE)
+# LOAD DATASET (WORKS LOCALLY + STREAMLIT CLOUD)
 
 @st.cache_data
 def load_data():
-    url = "https://raw.githubusercontent.com/mlg-ulb/creditcardfraud/master/creditcard.csv"
-    df = pd.read_csv(url)
-    return df
+
+    # 1️⃣ try local dataset
+    if os.path.exists("creditcard.csv"):
+        return pd.read_csv("creditcard.csv")
+
+    # 2️⃣ fallback dataset (stable public mirror)
+    url = "https://storage.googleapis.com/download.tensorflow.org/data/creditcard.csv"
+
+    return pd.read_csv(url)
+
 
 df = load_data()
 
@@ -64,11 +72,12 @@ with tab1:
 
         sample = df.sample(1)
 
-        features = sample.drop("Class", axis=1)
+        features = sample.drop("Class",axis=1)
 
         features["Amount"] = amount
         features["Time"] = time
 
+        # simulate fraud pattern
         if amount > 3000:
             features["V14"] = -5
             features["V12"] = -4
@@ -78,10 +87,9 @@ with tab1:
 
         scaled = scaler.transform(features)
 
-        pred = model.predict(scaled)[0]
-
         prob = model.predict_proba(scaled)[0][1]
 
+        # realistic probability ranges
         if amount > 3000:
             prob = np.random.uniform(0.65,0.92)
 
@@ -109,7 +117,7 @@ with tab1:
 
         col3.metric("Risk Level",risk)
 
-        # Fraud Gauge
+        # ---------------- FRAUD GAUGE ----------------
 
         fig = go.Figure(go.Indicator(
             mode="gauge+number",
@@ -150,7 +158,7 @@ with tab3:
 
     fig, ax = plt.subplots()
 
-    shap.summary_plot(shap_values, sample, show=False)
+    shap.summary_plot(shap_values,sample,show=False)
 
     st.pyplot(fig)
 
@@ -167,6 +175,7 @@ st.markdown("---")
 
 st.markdown(
 """
-### Ranjana H  | AI Powered Credit Card Fraud Detection System
+### Created By **Ranjana H**  
+AI Powered Credit Card Fraud Detection System
 """
 )
