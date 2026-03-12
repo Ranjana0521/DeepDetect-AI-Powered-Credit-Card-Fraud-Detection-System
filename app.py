@@ -175,7 +175,6 @@ st.markdown("---")
 
 st.markdown(
 """
-### Created By **Ranjana H**  
-AI Powered Credit Card Fraud Detection System
+### **Ranjana H**  | AI Powered Credit Card Fraud Detection System
 """
 )
