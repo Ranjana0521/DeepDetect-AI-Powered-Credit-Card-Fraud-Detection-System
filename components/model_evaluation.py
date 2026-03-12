@@ -4,50 +4,87 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
+from sklearn.metrics import confusion_matrix, roc_curve, auc
+from sklearn.model_selection import train_test_split
+import joblib
+
+
+# -------------------------------------------------------
+# LOAD DATASET SAFELY (LOCAL OR ONLINE)
 
 @st.cache_data
 def load_data():
 
+    # try local dataset first
     if os.path.exists("creditcard.csv"):
         return pd.read_csv("creditcard.csv")
 
+    # fallback dataset (stable public mirror)
     url = "https://storage.googleapis.com/download.tensorflow.org/data/creditcard.csv"
 
     return pd.read_csv(url)
 
 
-def show_dashboard():
+# -------------------------------------------------------
+# MODEL EVALUATION
 
-    st.subheader("📊 Transaction Analytics Dashboard")
+def show_model_metrics():
+
+    st.subheader("📊 Model Evaluation")
 
     df = load_data()
 
-    col1, col2 = st.columns(2)
+    X = df.drop("Class", axis=1)
+    y = df["Class"]
 
-    # Fraud vs Legit Transactions
-    with col1:
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
 
-        st.markdown("### Fraud vs Legit Transactions")
+    model = joblib.load("model/fraud_model.pkl")
 
-        fraud_counts = df["Class"].value_counts()
+    y_pred = model.predict(X_test)
 
-        fig, ax = plt.subplots()
+    # ---------------- CONFUSION MATRIX ----------------
 
-        sns.barplot(
-            x=["Legit", "Fraud"],
-            y=fraud_counts.values,
-            palette="viridis"
-        )
+    st.markdown("### Confusion Matrix")
 
-        st.pyplot(fig)
+    cm = confusion_matrix(y_test, y_pred)
 
-    # Amount Distribution
-    with col2:
+    fig, ax = plt.subplots()
 
-        st.markdown("### Transaction Amount Distribution")
+    sns.heatmap(
+        cm,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
+        xticklabels=["Legit", "Fraud"],
+        yticklabels=["Legit", "Fraud"]
+    )
 
-        fig, ax = plt.subplots()
+    ax.set_xlabel("Predicted")
+    ax.set_ylabel("Actual")
 
-        sns.histplot(df["Amount"], bins=50, kde=True)
+    st.pyplot(fig)
 
-        st.pyplot(fig)
+    # ---------------- ROC CURVE ----------------
+
+    st.markdown("### ROC Curve")
+
+    y_prob = model.predict_proba(X_test)[:, 1]
+
+    fpr, tpr, _ = roc_curve(y_test, y_prob)
+
+    roc_auc = auc(fpr, tpr)
+
+    fig2, ax2 = plt.subplots()
+
+    ax2.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+    ax2.plot([0, 1], [0, 1], '--')
+
+    ax2.set_xlabel("False Positive Rate")
+    ax2.set_ylabel("True Positive Rate")
+    ax2.set_title("ROC Curve")
+    ax2.legend()
+
+    st.pyplot(fig2)
