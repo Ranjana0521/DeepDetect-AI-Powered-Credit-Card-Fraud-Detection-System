@@ -10,23 +10,20 @@ import joblib
 
 
 # -------------------------------------------------------
-# LOAD DATASET SAFELY (LOCAL OR ONLINE)
+# LOAD DATASET (WORKS LOCALLY + STREAMLIT CLOUD)
 
 @st.cache_data
 def load_data():
 
-    # try local dataset first
+    # try local dataset
     if os.path.exists("creditcard.csv"):
         return pd.read_csv("creditcard.csv")
 
-    # fallback dataset (stable public mirror)
+    # fallback online dataset
     url = "https://storage.googleapis.com/download.tensorflow.org/data/creditcard.csv"
 
     return pd.read_csv(url)
 
-
-# -------------------------------------------------------
-# MODEL EVALUATION
 
 def show_model_metrics():
 
