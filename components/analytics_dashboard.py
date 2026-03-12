@@ -51,7 +51,3 @@ def show_dashboard():
         sns.histplot(df["Amount"],bins=50,kde=True,ax=ax)
 
         st.pyplot(fig)
-
-    st.markdown("### Sample Transactions")
-
-    st.dataframe(df.sample(10))
